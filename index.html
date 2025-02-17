@@ -30,7 +30,6 @@
     text {
       font-size: 12px;
       fill: #fff;
-      pointer-events: none;
     }
   </style>
 </head>
@@ -42,14 +41,15 @@
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script>
     const nodes = [
-      { id: 'Me', info: 'Central node about Luke' },
-      { id: 'History', info: 'Stories, experiences, and milestones' },
-      { id: 'Lessons', info: 'Key insights and teachings' }
+      { id: 'Me', info: 'About Luke' },
+      { id: 'History', parent: 'Me', info: 'Stories and milestones' },
+      { id: 'Lessons', parent: 'Me', info: 'Insights and teachings' },
+      { id: 'Childhood', parent: 'History', info: 'Early life memories' },
+      { id: 'Work', parent: 'History', info: 'Career experiences' },
+      { id: 'Quotes', parent: 'Lessons', info: 'Memorable lessons' }
     ];
-    const links = [
-      { source: 'Me', target: 'History' },
-      { source: 'Me', target: 'Lessons' }
-    ];
+
+    const links = nodes.filter(n => n.parent).map(n => ({ source: n.parent, target: n.id }));
 
     const svg = d3.select('#graph-container')
       .append('svg')
@@ -57,17 +57,22 @@
       .attr('height', window.innerHeight * 0.7);
 
     const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(d => d.id).distance(150))
-      .force('charge', d3.forceManyBody().strength(-400))
+      .force('link', d3.forceLink(links).id(d => d.id).distance(120))
+      .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(window.innerWidth / 2, window.innerHeight * 0.35));
 
-    const link = svg.append('g').selectAll('line')
-      .data(links).enter().append('line')
+    const link = svg.append('g')
+      .selectAll('line')
+      .data(links)
+      .enter().append('line')
       .attr('stroke', '#00FFAA').attr('stroke-width', 2);
 
-    const node = svg.append('g').selectAll('circle')
-      .data(nodes).enter().append('circle')
-      .attr('r', 20).attr('fill', '#00BFFF')
+    const node = svg.append('g')
+      .selectAll('circle')
+      .data(nodes)
+      .enter().append('circle')
+      .attr('r', 15)
+      .attr('fill', d => d.id === 'Me' ? '#FF4500' : '#00BFFF')
       .on('click', (event, d) => {
         document.getElementById('info-panel').innerText = `${d.id}: ${d.info}`;
       })
@@ -76,23 +81,27 @@
         .on('drag', dragged)
         .on('end', dragended));
 
-    svg.append('g').selectAll('text')
-      .data(nodes).enter().append('text')
-      .text(d => d.id)
-      .attr('text-anchor', 'middle');
+    const labels = svg.append('g')
+      .selectAll('text')
+      .data(nodes)
+      .enter().append('text')
+      .attr('dy', -20)
+      .attr('text-anchor', 'middle')
+      .text(d => d.id);
 
     simulation.on('tick', () => {
       link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
           .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
 
       node.attr('cx', d => d.x).attr('cy', d => d.y);
+      labels.attr('x', d => d.x).attr('y', d => d.y);
     });
 
     document.getElementById('search-bar').addEventListener('input', (e) => {
       const search = e.target.value.toLowerCase();
-      const found = nodes.find(n => n.id.toLowerCase().includes(search));
-      if (found) {
-        document.getElementById('info-panel').innerText = `${found.id}: ${found.info}`;
+      const result = nodes.find(n => n.id.toLowerCase().includes(search));
+      if (result) {
+        document.getElementById('info-panel').innerText = `${result.id}: ${result.info}`;
       }
     });
 
