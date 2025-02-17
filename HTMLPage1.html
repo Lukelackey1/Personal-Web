@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>Luke's Knowledge Graph</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #graph-container {
+      width: 100vw;
+      height: 80vh;
+      position: relative;
+    }
+    #info {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      padding: 10px;
+      background: rgba(50, 50, 50, 0.8);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .node {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Luke's Interactive Web Graph</h1>
+  <div id="graph-container"></div>
+  <div id="info">Click a node to explore!</div>
+
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script>
+    const nodes = [
+      { id: 'Me' },
+      { id: 'History' },
+      { id: 'Lessons' },
+      { id: 'Projects' }
+    ];
+
+    const links = [
+      { source: 'Me', target: 'History' },
+      { source: 'Me', target: 'Lessons' },
+      { source: 'Me', target: 'Projects' }
+    ];
+
+    const width = window.innerWidth;
+    const height = window.innerHeight * 0.8;
+
+    const svg = d3.select('#graph-container')
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height);
+
+    const simulation = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(d => d.id).distance(150))
+      .force('charge', d3.forceManyBody().strength(-300))
+      .force('center', d3.forceCenter(width / 2, height / 2));
+
+    const link = svg.append('g')
+      .selectAll('line')
+      .data(links)
+      .join('line')
+      .attr('stroke', '#00FFAA')
+      .attr('stroke-width', 2);
+
+    const node = svg.append('g')
+      .selectAll('circle')
+      .data(nodes)
+      .join('circle')
+      .attr('r', 15)
+      .attr('fill', d => d.id === 'Me' ? '#FF4500' : '#00BFFF')
+      .attr('class', 'node')
+      .on('click', (event, d) => {
+        document.getElementById('info').innerText = `You clicked: ${d.id}`;
+      })
+      .call(d3.drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended));
+
+    simulation.on('tick', () => {
+      link
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
+
+      node
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+    });
+
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+  </script>
+</body>
+</html>
