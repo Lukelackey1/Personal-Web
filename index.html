@@ -1,124 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Luke's Interactive Knowledge Graph</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #000;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-    }
-    #graph-container {
-      width: 100vw;
-      height: 70vh;
-    }
-    #info-panel {
-      height: 20vh;
-      overflow-y: auto;
-      background: rgba(30, 30, 30, 0.9);
-      padding: 10px;
-      border-top: 2px solid #555;
-    }
-    #search-bar {
-      margin: 10px;
-      padding: 5px;
-      width: 250px;
-    }
-    text {
-      font-size: 12px;
-      fill: #fff;
-    }
-  </style>
+    <title>Luke's Power BI Dashboard</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        iframe {
+            width: 100%;
+            max-width: 1140px;
+            height: 600px;
+            border: none;
+            margin: 20px auto;
+            display: block;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <input id="search-bar" placeholder="Search nodes..." />
-  <div id="graph-container"></div>
-  <div id="info-panel">Select a node to see details.</div>
-
-  <script src="https://d3js.org/d3.v6.min.js"></script>
-  <script>
-    const nodes = [
-      { id: 'Me', info: 'About Luke' },
-      { id: 'History', parent: 'Me', info: 'Stories and milestones' },
-      { id: 'Lessons', parent: 'Me', info: 'Insights and teachings' },
-      { id: 'Childhood', parent: 'History', info: 'Early life memories' },
-      { id: 'Work', parent: 'History', info: 'Career experiences' },
-      { id: 'Quotes', parent: 'Lessons', info: 'Memorable lessons' }
-    ];
-
-    const links = nodes.filter(n => n.parent).map(n => ({ source: n.parent, target: n.id }));
-
-    const svg = d3.select('#graph-container')
-      .append('svg')
-      .attr('width', window.innerWidth)
-      .attr('height', window.innerHeight * 0.7);
-
-    const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(d => d.id).distance(120))
-      .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(window.innerWidth / 2, window.innerHeight * 0.35));
-
-    const link = svg.append('g')
-      .selectAll('line')
-      .data(links)
-      .enter().append('line')
-      .attr('stroke', '#00FFAA').attr('stroke-width', 2);
-
-    const node = svg.append('g')
-      .selectAll('circle')
-      .data(nodes)
-      .enter().append('circle')
-      .attr('r', 15)
-      .attr('fill', d => d.id === 'Me' ? '#FF4500' : '#00BFFF')
-      .on('click', (event, d) => {
-        document.getElementById('info-panel').innerText = `${d.id}: ${d.info}`;
-      })
-      .call(d3.drag()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended));
-
-    const labels = svg.append('g')
-      .selectAll('text')
-      .data(nodes)
-      .enter().append('text')
-      .attr('dy', -20)
-      .attr('text-anchor', 'middle')
-      .text(d => d.id);
-
-    simulation.on('tick', () => {
-      link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
-
-      node.attr('cx', d => d.x).attr('cy', d => d.y);
-      labels.attr('x', d => d.x).attr('y', d => d.y);
-    });
-
-    document.getElementById('search-bar').addEventListener('input', (e) => {
-      const search = e.target.value.toLowerCase();
-      const result = nodes.find(n => n.id.toLowerCase().includes(search));
-      if (result) {
-        document.getElementById('info-panel').innerText = `${result.id}: ${result.info}`;
-      }
-    });
-
-    function dragstarted(event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-    function dragged(event, d) {
-      d.fx = event.x;
-      d.fy = event.y;
-    }
-    function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-  </script>
+    <h1>Airbnb Opportunity Dashboard</h1>
+    
+    <iframe 
+        title="Airbnb opportunity" 
+        src="https://app.powerbi.com/reportEmbed?reportId=be56f0f1-824b-4a53-a63e-d276f203f22a&autoAuth=true&ctid=26d7a77e-3bd4-49b9-b61f-5063de4f11e6" 
+        allowFullScreen="true">
+    </iframe>
 </body>
 </html>
